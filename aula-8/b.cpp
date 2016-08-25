@@ -8,7 +8,10 @@ char d[1007][22], s[99], enc[256], use[256];
 int k, start[22], n, len[105], g[1005];
 
 bool comp(int i, int j) {
-    return strcmp(d[i],d[j]) < 0;
+    int p = strlen(d[i]);
+    int q = strlen(d[j]);
+    if(p == q) return strcmp(d[i],d[j]) < 0;
+    return p < q;
 }
 
 bool bt(int j) {
@@ -17,23 +20,23 @@ bool bt(int j) {
         return true;
     }
     if(s[j] == ' ') return bt(j+1);
+    if(start[len[j]] == -1) return false;
     for(int i = start[len[j]]; i < n && strlen(d[g[i]]) == len[j]; i++) {
+        int v[22];
+        int cont = 0;
         bool go = true;
-        for(int p = 0; p < len[j] && go; p++) {
-            if(enc[s[j+p]] && enc[s[j+p]] != d[g[i]][p]) go = false;
-            if(!enc[s[j+p]] && use[d[g[i]][p]]) go = false;
-        }
-        if(go) {
-            int v[22];
-            int cont = 0;
-            for(int p = 0; p < len[j]; p++){
-                if(!enc[s[j+p]]) v[cont++] = p;
+        for(int p = 0; p < len[j] && go; p++){
+            if(!enc[s[j+p]] && !use[d[g[i]][p]]){
+                v[cont++] = p;
                 enc[s[j+p]] = d[g[i]][p];
                 use[d[g[i]][p]] = s[j+p];
+            } else {
+                if(enc[s[j+p]] && enc[s[j+p]] != d[g[i]][p]) go = false;
+                if(!enc[s[j+p]] && use[d[g[i]][p]]) go = false;
             }
-            if(bt(j+len[j])) return true;
-            for(int p = 0; p < cont; p++) { enc[s[j+v[p]]] = 0; use[d[g[i]][v[p]]] = 0; }
         }
+        if(go && bt(j+len[j])) return true;
+        for(int p = 0; p < cont; p++) { enc[s[j+v[p]]] = 0; use[d[g[i]][v[p]]] = 0; }
     }
     return false;
 }
@@ -42,6 +45,7 @@ int main() {
     scanf("%d",&n);
     for(int i = 0; i < n; i++) { scanf(" %s",d[i]); g[i] = i; }
     sort(g,g+n, comp);
+    for(int i = 0; i < 20; i++) start[i] = -1;
     for(int i = n-1; i >= 0; i--) start[strlen(d[g[i]])] = i;
 
     while (scanf(" %[^\n]",s) != EOF) {
