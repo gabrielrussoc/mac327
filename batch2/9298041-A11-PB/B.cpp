@@ -7,9 +7,9 @@ typedef long long ll;
 const int N = 11234;
 const int M = 2e6 + 42;
 
-int n, m, s, es, ss;
+int n, m, s, es;
 int to[M], nx[M], head[N], vis[M], deg[N];
-int prox[M], res[M], ps;
+vector<int> ans;
 
 void fail() {
     puts("0");
@@ -17,15 +17,18 @@ void fail() {
 }
 
 int dfs(int u, int f, int s) {
-    if(f && u == s) return true;
     vis[f] = 1;
-    int ans = 0;
+    if(f && u == s) return true;
     for(int e = head[u]; e; e = nx[e]) {
         int v = to[e];
         if(!vis[e]) {
             deg[u]--;
-            if(dfs(v,e,s)) return 1;
-            if(deg[v]) dfs(v,0) 
+            if(dfs(v,e,s)) {
+                while (deg[v])
+                    if (!dfs(v,0,v)) return 0;
+                ans.pb(v);
+                return 1;
+            }
         }
     }
     return 0;
@@ -43,9 +46,13 @@ int main() {
             scanf("%d",&v);
             to[es] = v; nx[es] = head[u]; head[u] = es++;
             deg[u]++;
-            un.insert(u);
             u = v;
         }
     }
-    if(!dfs(s,0,s)) fail();
+    if(dfs(s,0,s)) while(deg[s]) if (!dfs(s,0,s)) fail();
+    printf("%d",ans.size());
+    ans.pb(ans[0]);
+    reverse(ans.begin(), ans.end());
+    for(int u : ans) printf(" %d",u);
+    putchar('\n');
 }
